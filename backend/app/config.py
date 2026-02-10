@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    APP_SECRET_KEY: str = "your-secret-key-here-change-in-production"
 
     # Database settings
     POSTGRES_HOST: str = "localhost"

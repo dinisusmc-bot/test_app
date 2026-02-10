@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import MapContainer from '../Map/MapContainer';
 import DeviceList from './DeviceList';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
 interface Device {
   id: string;
   name: string;
@@ -21,10 +23,12 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/devices');
+        const response = await fetch(`${API_BASE_URL}/devices`);
         if (!response.ok) throw new Error('Failed to fetch devices');
         const data = await response.json();
-        setDevices(data);
+        // Handle both array and object response formats
+        const devices = Array.isArray(data) ? data : (data as any).devices || [];
+        setDevices(devices);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
