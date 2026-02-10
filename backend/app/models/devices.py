@@ -21,7 +21,7 @@ class Device(Base):
     location_lat = Column(Float, nullable=True)  # LA/San Diego area
     location_lon = Column(Float, nullable=True)
     last_seen = Column(DateTime, default=datetime.utcnow)
-    metadata = Column(JSON, default=dict)
+    extra_data = Column(JSON, default=dict)
     zone = Column(String(50), nullable=True)  # LA, San Diego, etc.
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -37,7 +37,7 @@ class Device(Base):
             "location_lat": self.location_lat,
             "location_lon": self.location_lon,
             "last_seen": self.last_seen.isoformat() if self.last_seen else None,
-            "metadata": self.metadata,
+            "extra_data": self.extra_data,
             "zone": self.zone,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),

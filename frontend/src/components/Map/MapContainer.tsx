@@ -1,4 +1,5 @@
-import Map from 'react-map-gl';
+import { useState } from 'react';
+import Map, { Popup } from 'react-map-gl/maplibre';
 import DeviceMarker from './DeviceMarker';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -25,7 +26,6 @@ export default function MapContainer({ devices, center = [-118.2437, 34.0522], z
     zoom: zoom,
   });
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
-  const [popupOffset, setPopupOffset] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
 
   return (
     <Map
@@ -56,7 +56,6 @@ export default function MapContainer({ devices, center = [-118.2437, 34.0522], z
           latitude={selectedDevice.lat}
           longitude={selectedDevice.lon}
           onClose={() => setSelectedDevice(null)}
-          offset={popupOffset}
           className="device-popup"
           style={{ maxWidth: '250px' }}
         >

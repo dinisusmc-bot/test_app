@@ -16,7 +16,7 @@ class DeviceBase(BaseModel):
     location_lat: Optional[float] = Field(default=None, ge=-90, le=90)
     location_lon: Optional[float] = Field(default=None, ge=-180, le=180)
     zone: Optional[str] = Field(default=None, max_length=50)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    extra_data: Dict[str, Any] = Field(default_factory=dict)
 
 
 class DeviceCreate(DeviceBase):
@@ -31,7 +31,7 @@ class DeviceUpdate(BaseModel):
     location_lat: Optional[float] = Field(default=None, ge=-90, le=90)
     location_lon: Optional[float] = Field(default=None, ge=-180, le=180)
     zone: Optional[str] = Field(default=None, max_length=50)
-    metadata: Optional[Dict[str, Any]] = Field(default=None)
+    extra_data: Optional[Dict[str, Any]] = Field(default=None)
     is_active: Optional[bool] = None
 
 

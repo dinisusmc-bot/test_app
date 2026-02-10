@@ -16,7 +16,7 @@ from app.schemas.locations import LocationCreate, LocationResponse, LocationNear
 from app.schemas.events import EventCreate, EventResponse, EventDeviceResponse
 from app.schemas.commands import CommandCreate, CommandResponse
 
-router = APIRouter(prefix="/api/v1", tags=["v1"])
+router = APIRouter(tags=["v1"])
 
 
 # Devices endpoints
@@ -29,15 +29,16 @@ async def list_devices(
     offset: int = 0,
 ):
     """List all devices."""
-    query = session.query(Device).filter(Device.is_active == True)
+    from sqlalchemy import select
+    stmt = select(Device).where(Device.is_active == True)
     
     if zone:
-        query = query.filter(Device.zone == zone)
+        stmt = stmt.where(Device.zone == zone)
     if status:
-        query = query.filter(Device.status == status)
+        stmt = stmt.where(Device.status == status)
     
-    devices = await session.execute(query.offset(offset).limit(limit))
-    devices = devices.scalars().all()
+    result = await session.execute(stmt.offset(offset).limit(limit))
+    devices = result.scalars().all()
     
     return {"devices": devices, "total": len(devices)}
 
@@ -109,13 +110,14 @@ async def list_locations(
     zone: str = None,
 ):
     """List all locations."""
-    query = session.query(Location)
+    from sqlalchemy import select
+    stmt = select(Location)
     
     if zone:
-        query = query.filter(Location.zone == zone)
+        stmt = stmt.where(Location.zone == zone)
     
-    locations = await session.execute(query)
-    return locations.scalars().all()
+    result = await session.execute(stmt)
+    return result.scalars().all()
 
 
 @router.get("/locations/{location_id}", response_model=LocationResponse)

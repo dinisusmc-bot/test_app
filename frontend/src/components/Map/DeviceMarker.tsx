@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Marker from 'react-map-gl/Marker';
+import { Marker } from 'react-map-gl/maplibre';
 
 interface DeviceMarkerProps {
   device: {

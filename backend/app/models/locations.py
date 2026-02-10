@@ -21,7 +21,7 @@ class Location(Base):
     location_lon = Column(Float, nullable=False)
     area_type = Column(String(20), nullable=True)  # urban, suburban, industrial
     zone = Column(String(50), nullable=True)  # LA, San Diego, etc.
-    metadata = Column(JSON, default=dict)
+    extra_data = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -35,7 +35,7 @@ class Location(Base):
             "location_lon": self.location_lon,
             "area_type": self.area_type,
             "zone": self.zone,
-            "metadata": self.metadata,
+            "extra_data": self.extra_data,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
