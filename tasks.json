@@ -1,0 +1,131 @@
+{
+  "project": "Command & Control System",
+  "tasks": [
+    {
+      "name": "Phase 1.1: Backend - Create main.py with FastAPI setup",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create FastAPI application with CORS, routes, and health check endpoints",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.2: Backend - Database connection and session management",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create database.py with async PostgreSQL connection using asyncpg",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.3: Backend - Core models (Devices, Locations, Events, Commands)",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create SQLAlchemy models for all core entities with proper relationships",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.4: Backend - Pydantic schemas for request/response validation",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create Pydantic schemas for all API endpoints",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.5: Backend - REST API v1 endpoints with full CRUD",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Implement all REST endpoints for devices, locations, events, and commands",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.6: Backend - WebSocket endpoints for real-time updates",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Implement WebSocket connections for real-time device updates",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.7: Backend - Simulated data generation for LA/San Diego areas",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create data generator utilities for realistic test data",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.8: Backend - Database schema and initialization",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 5,
+      "plan": "Create PostgreSQL schema with tables, indexes, and triggers",
+      "notes": "Already completed"
+    },
+    {
+      "name": "Phase 1.9: Backend - Tests for API endpoints",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 4,
+      "plan": "Write pytest tests for all API endpoints",
+      "notes": "Test file created, needs running"
+    },
+    {
+      "name": "Phase 2.1: Frontend - Create React project with Vite",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 5,
+      "plan": "Initialize React project with TypeScript, Vite, and proper structure",
+      "notes": ""
+    },
+    {
+      "name": "Phase 2.2: Frontend - Install and configure MapLibre for geospatial visualization",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 5,
+      "plan": "Integrate MapLibre GL JS for interactive maps with LA/San Diego focus",
+      "notes": ""
+    },
+    {
+      "name": "Phase 2.3: Frontend - Create dashboard layout with device/status panels",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Build main dashboard layout with device lists and status indicators",
+      "notes": ""
+    },
+    {
+      "name": "Phase 2.4: Frontend - Implement map view with device markers",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Add interactive map with clickable device markers and popups",
+      "notes": ""
+    },
+    {
+      "name": "Phase 2.5: Frontend - Connect to backend API endpoints",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Implement API calls for all backend endpoints using React Query",
+      "notes": ""
+    },
+    {
+      "name": "Phase 2.6: Frontend - Add WebSocket for real-time updates",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Connect WebSocket to receive real-time device status updates",
+      "notes": ""
+    },
+    {
+      "name": "Phase 3.1: Documentation - Create comprehensive README",
+      "phase": "Phase 3: Documentation",
+      "priority": 3,
+      "plan": "Write complete README with setup instructions, API docs, and examples",
+      "notes": ""
+    },
+    {
+      "name": "Phase 3.2: Documentation - API documentation",
+      "phase": "Phase 3: Documentation",
+      "priority": 3,
+      "plan": "Document all API endpoints with request/response examples",
+      "notes": ""
+    },
+    {
+      "name": "Phase 3.3: Testing - E2E tests with Cypress",
+      "phase": "Phase 3: Documentation",
+      "priority": 3,
+      "plan": "Write Cypress tests for key user flows",
+      "notes": ""
+    }
+  ]
+}
