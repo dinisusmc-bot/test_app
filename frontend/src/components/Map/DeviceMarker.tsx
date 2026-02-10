@@ -7,7 +7,7 @@ interface DeviceMarkerProps {
     name: string;
     lat: number;
     lon: number;
-    status: string;
+    status: 'online' | 'offline' | 'maintenance';
     type: string;
   };
   onClick: () => void;
@@ -16,7 +16,9 @@ interface DeviceMarkerProps {
 export default function DeviceMarker({ device, onClick }: DeviceMarkerProps) {
   const [hovered, setHovered] = useState(false);
 
-  const color = device.status === 'online' ? '#007cbf' : device.status === 'offline' ? '#e74c3c' : '#f39c12';
+  const color =
+    device.status === 'online' ? '#4caf50' :
+    device.status === 'offline' ? '#f44336' : '#ff9800';
 
   return (
     <Marker
