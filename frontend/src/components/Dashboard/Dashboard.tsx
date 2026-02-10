@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import MapContainer from '../Map/MapContainer';
-import DeviceList from '../DeviceList';
+import DeviceList from './DeviceList';
 
 interface Device {
   id: string;

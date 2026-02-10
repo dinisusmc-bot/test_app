@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Map, { Popup } from 'react-map-gl/maplibre';
+import type { ViewStateChangeEvent, MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import DeviceMarker from './DeviceMarker';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -30,13 +31,10 @@ export default function MapContainer({ devices, center = [-118.2437, 34.0522], z
   return (
     <Map
       {...viewport}
-      width="100%"
-      height="100%"
-      style={{ width: '100%', height: '100%' }}
       mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-      onMove={(evt) => setViewport(evt.viewState)}
-      onClick={(e) => {
-        if (e.originalEvent.type === 'click') {
+      onMove={(evt: ViewStateChangeEvent) => setViewport(evt.viewState)}
+      onClick={(e: MapLayerMouseEvent) => {
+        if (e.originalEvent && e.originalEvent.type === 'click') {
           setSelectedDevice(null);
         }
       }}

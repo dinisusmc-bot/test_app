@@ -9,13 +9,13 @@ interface Device {
 }
 
 interface WebSocketService {
+  ws: WebSocket | null;
   connect: () => void;
   disconnect: () => void;
   onMessage: (callback: (data: Device) => void) => void;
   getStatus: () => 'connected' | 'connecting' | 'disconnected';
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
 
 export const websocketService: WebSocketService = {
@@ -35,7 +35,7 @@ export const websocketService: WebSocketService = {
       setTimeout(() => this.connect(), 5000);
     };
 
-    this.ws.onerror = (error) => {
+    this.ws.onerror = (error: Event) => {
       console.error('WebSocket error:', error);
     };
   },
@@ -49,7 +49,7 @@ export const websocketService: WebSocketService = {
 
   onMessage(callback: (data: Device) => void) {
     if (this.ws) {
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = (event: MessageEvent) => {
         try {
           const data: Device = JSON.parse(event.data);
           callback(data);

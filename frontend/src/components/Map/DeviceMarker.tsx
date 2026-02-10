@@ -24,10 +24,7 @@ export default function DeviceMarker({ device, onClick }: DeviceMarkerProps) {
     <Marker
       latitude={device.lat}
       longitude={device.lon}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
+      onClick={onClick}
     >
       <div
         onMouseEnter={() => setHovered(true)}
