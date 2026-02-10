@@ -257,6 +257,12 @@ Standardize naming conventions or use adapters. Either agree on consistent field
 3. Error handling: Always handle unexpected data structures gracefully
 4. Type safety: Use TypeScript interfaces that match backend models
 
+### Container Networking
+1. Docker Desktop: Use `host.docker.internal` to reach host services from containers
+2. Docker Compose services: Use service names for inter-container communication
+3. Relative URLs: Use relative paths in browser-based frontends
+4. Nginx proxy: Configure reverse proxy for clean routing
+
 ### Debugging Strategy
 1. One issue at a time: Fix errors sequentially, rebuilding after each fix
 2. Read error messages carefully: They usually indicate the exact problem
@@ -308,3 +314,27 @@ Most issues stemmed from:
 4. Data structure assumptions (API response format, field names)
 
 By following these lessons and best practices, similar issues can be prevented or resolved much more quickly in future projects.
+
+---
+
+## Key Docker Networking Lesson
+
+### Issue
+Frontend container couldn't connect to backend services using `localhost` from within the Docker network.
+
+### Root Cause
+Inside Docker containers, `localhost` refers to the container itself, not the host machine. The Docker Compose service names (like `backend`, `postgres`) are used for inter-container communication.
+
+### Solution
+For Docker Desktop, use `host.docker.internal` to reach services running on the host machine:
+- Backend API: `http://host.docker.internal:45847/api/v1`
+- Database: `postgresql://postgres@host.docker.internal:5432/test_app`
+
+For Docker Compose service-to-service communication, use service names:
+- Backend from nginx: `http://backend:8000`
+- Database from backend: `postgresql://...@postgres:5432/test_app`
+
+### Lesson
+- **Docker Desktop**: Use `host.docker.internal` to reach host services
+- **Docker Compose services**: Use service names (`backend`, `postgres`) for container-to-container communication
+- **Browser-based apps**: Use relative paths (`/api/v1`) to avoid URL issues entirely
