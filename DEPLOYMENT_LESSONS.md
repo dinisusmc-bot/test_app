@@ -250,6 +250,7 @@ Standardize naming conventions or use adapters. Either agree on consistent field
 2. Reserved words: Check ORM documentation for reserved column names
 3. Migrations: Consider using Alembic or similar for schema management
 4. Init scripts: Keep initialization scripts simple and idempotent
+5. **Clean state**: Always run `docker compose down -v` before schema changes to remove old volumes
 
 ### Frontend-Backend Integration
 1. API contracts: Document expected request/response formats
@@ -275,7 +276,7 @@ Standardize naming conventions or use adapters. Either agree on consistent field
 
 ### Useful Docker Commands
 ```bash
-# Clean slate
+# Clean slate (before schema changes)
 docker compose down -v
 
 # Build specific service
