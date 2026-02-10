@@ -1,7 +1,4 @@
-"""
-PostgreSQL schema for Command & Control system.
-"""
-
+-- PostgreSQL schema for Command & Control system.
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -14,7 +11,7 @@ CREATE TABLE devices (
     location_lat FLOAT,
     location_lon FLOAT,
     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    metadata JSONB DEFAULT '{}',
+    extra_data JSONB DEFAULT '{}',
     zone VARCHAR(50),
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -30,7 +27,7 @@ CREATE TABLE locations (
     location_lon FLOAT NOT NULL,
     area_type VARCHAR(20) CHECK (area_type IN ('urban', 'suburban', 'industrial')),
     zone VARCHAR(50),
-    metadata JSONB DEFAULT '{}',
+    extra_data JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

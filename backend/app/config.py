@@ -4,6 +4,7 @@ Configuration for Command & Control API.
 
 from pydantic_settings import BaseSettings
 from typing import List
+import json
 
 
 class Settings(BaseSettings):
@@ -16,8 +17,8 @@ class Settings(BaseSettings):
 
     # Database settings
     POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5433
-    POSTGRES_DB: str = "command_control"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "test_app"
     POSTGRES_USER: str = "openclaw"
     POSTGRES_PASSWORD: str = "openclaw_dev_pass"
 
@@ -26,8 +27,16 @@ class Settings(BaseSettings):
         """Build database URL."""
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    # CORS settings
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    # CORS settings - accept comma-separated string or JSON array
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+
+    @property
+    def CORS_ORIGINS_LIST(self) -> List[str]:
+        """Parse CORS origins from string."""
+        try:
+            return json.loads(self.CORS_ORIGINS)
+        except json.JSONDecodeError:
+            return [origin.strip() for origin in self.CORS_ORIGINS.split(',')]
 
     class Config:
         env_file = ".env"
