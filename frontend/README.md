@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# Command & Control Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend with MapLibre GL JS for geospatial visualization of devices in LA and San Diego areas.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive Map**: Real-time device tracking with MapLibre GL JS
+- **Device List**: View all devices with status indicators (online/offline/maintenance)
+- **Device Details**: Click devices on map or list to see details
+- **Simulated Data**: 8 sample devices across LA and San Diego areas
+- **Real-time Updates**: WebSocket integration for live status updates
 
-## React Compiler
+## Project Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── Dashboard/
+│   │   │   ├── Dashboard.tsx    # Main dashboard layout
+│   │   │   └── DeviceList.tsx   # Device list component
+│   │   ├── Map/
+│   │   │   ├── MapContainer.tsx # Map container component
+│   │   │   └── DeviceMarker.tsx # Device marker component
+│   │   └── Device/
+│   │       └── DeviceDetails.tsx # Device details panel
+│   ├── services/
+│   │   ├── api.ts               # API client with axios
+│   │   └── websocket.ts         # WebSocket service
+│   ├── App.tsx                  # Main app component
+│   └── main.tsx                 # Entry point
+├── public/
+├── package.json
+└── vite.config.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## API Integration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Backend URL**: `http://localhost:45847/api/v1`
+- **WebSocket URL**: `ws://localhost:45847/ws`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Quick Start
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+The app will start on `http://localhost:5173`.
+
+## Components
+
+### Dashboard
+Main layout with:
+- Stats cards (total, online, offline, maintenance devices)
+- Interactive map on the left
+- Device list on the right
+- Device details panel when selecting a device
+
+### MapContainer
+- Displays device markers on the map
+- Click markers to see device info
+- Shows popup with device details
+
+### DeviceList
+- Lists all devices with status badges
+- Click to select device and show details
+
+## Development
+
+```bash
+npm run dev        # Start dev server
+npm run build      # Build for production
+npm run preview    # Preview production build
+npm run lint       # Run ESLint
+```
+
+## Technologies
+
+- **React 18** with TypeScript
+- **Vite** - Fast build tool and dev server
+- **MapLibre GL JS** - Interactive maps
+- **axios** - HTTP client
+- **WebSocket API** - Real-time updates
+
+## API Endpoints
+
+### Devices
+- `GET /api/v1/devices` - List all devices
+- `GET /api/v1/devices/{id}` - Get device details
+
+### Locations
+- `GET /api/v1/locations` - List all locations
+
+## Status Colors
+
+- **Green (#4caf50)**: Online
+- **Red (#f44336)**: Offline
+- **Orange (#ff9800)**: Maintenance
