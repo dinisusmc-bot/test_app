@@ -1,0 +1,61 @@
+{
+  "project": "Command & Control System",
+  "tasks": [
+    {
+      "name": "Create backend package.json with dependencies",
+      "phase": "Phase 1: Backend Setup",
+      "priority": 6,
+      "plan": "Create Node.js package.json with Python dependencies for FastAPI backend",
+      "notes": "backend/package.json"
+    },
+    {
+      "name": "Create React project with Vite",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 5,
+      "plan": "Initialize React TypeScript project with Vite, Tailwind CSS",
+      "notes": "frontend/ directory"
+    },
+    {
+      "name": "Install MapLibre GL JS for geospatial maps",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 5,
+      "plan": "Integrate MapLibre GL JS with React for interactive maps",
+      "notes": "frontend/src/map/"
+    },
+    {
+      "name": "Create API service layer",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Create API service with React Query hooks for backend integration",
+      "notes": "frontend/src/services/api.ts"
+    },
+    {
+      "name": "Build dashboard layout component",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Create main dashboard with device lists, map, and stats panels",
+      "notes": "frontend/src/components/Dashboard/"
+    },
+    {
+      "name": "Implement device markers on map",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Add clickable device markers with popup details",
+      "notes": "frontend/src/components/MapDeviceMarker/"
+    },
+    {
+      "name": "Connect to WebSocket for real-time updates",
+      "phase": "Phase 2: Frontend Setup",
+      "priority": 4,
+      "plan": "Implement WebSocket client for live device updates",
+      "notes": "frontend/src/services/websocket.ts"
+    },
+    {
+      "name": "Create comprehensive README",
+      "phase": "Phase 3: Documentation",
+      "priority": 3,
+      "plan": "Write complete README with setup, API docs, and examples",
+      "notes": "README.md at project root"
+    }
+  ]
+}
