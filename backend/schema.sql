@@ -1,33 +1,34 @@
--- PostgreSQL schema for Command & Control system.
+-- PostgreSQL schema for GeoMap simulation with Assets and Engagements.
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Devices table
-CREATE TABLE devices (
+-- Assets table (friendly and enemy icons)
+CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
-    device_type VARCHAR(50) NOT NULL CHECK (device_type IN ('drone', 'sensor', 'camera', 'vehicle')),
-    status VARCHAR(20) NOT NULL DEFAULT 'online' CHECK (status IN ('online', 'offline', 'maintenance')),
-    location_lat FLOAT,
-    location_lon FLOAT,
+    asset_type VARCHAR(50) NOT NULL CHECK (asset_type IN ('drone', 'sensor', 'camera', 'vehicle')),
+    status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'in_use', 'maintenance', 'offline')),
+    lat FLOAT,
+    lon FLOAT,
     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     extra_data JSONB DEFAULT '{}',
     zone VARCHAR(50),
     is_active BOOLEAN DEFAULT true,
+    is_friendly BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Locations table
-CREATE TABLE locations (
+-- Engagements table (missile tracking)
+CREATE TABLE engagements (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
-    address VARCHAR(255),
-    location_lat FLOAT NOT NULL,
-    location_lon FLOAT NOT NULL,
-    area_type VARCHAR(20) CHECK (area_type IN ('urban', 'suburban', 'industrial')),
-    zone VARCHAR(50),
-    extra_data JSONB DEFAULT '{}',
+    friendly_id UUID REFERENCES assets(id) ON DELETE CASCADE,
+    enemy_id UUID REFERENCES assets(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'completed', 'cancelled')),
+    progress FLOAT DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+    estimated_completion TIMESTAMP,
+    details JSONB DEFAULT '{}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -35,9 +36,9 @@ CREATE TABLE locations (
 -- Events table
 CREATE TABLE events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    device_id UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
-    location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
-    event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('alert', 'status_change', 'command_ack')),
+    asset_id UUID REFERENCES assets(id) ON DELETE CASCADE,
+    engagement_id UUID REFERENCES engagements(id) ON DELETE SET NULL,
+    event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('alert', 'status_change', 'command_ack', 'engagement_start', 'engagement_end')),
     details JSONB DEFAULT '{}',
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     severity VARCHAR(20) CHECK (severity IN ('info', 'warning', 'critical')),
@@ -48,9 +49,9 @@ CREATE TABLE events (
 -- Commands table
 CREATE TABLE commands (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    device_id UUID NOT NULL,
-    location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
-    command_type VARCHAR(50) NOT NULL CHECK (command_type IN ('patrol', 'survey', 'return', 'stop', 'resume')),
+    asset_id UUID REFERENCES assets(id) ON DELETE CASCADE,
+    engagement_id UUID REFERENCES engagements(id) ON DELETE SET NULL,
+    command_type VARCHAR(50) NOT NULL CHECK (command_type IN ('patrol', 'survey', 'return', 'stop', 'resume', 'engage', 'disengage')),
     payload JSONB DEFAULT '{}',
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'acknowledged', 'failed')),
     error_message VARCHAR(255),
@@ -61,14 +62,18 @@ CREATE TABLE commands (
 );
 
 -- Indexes for better query performance
-CREATE INDEX idx_devices_zone ON devices(zone);
-CREATE INDEX idx_devices_status ON devices(status);
-CREATE INDEX idx_devices_location ON devices(location_lat, location_lon);
-CREATE INDEX idx_locations_zone ON locations(zone);
-CREATE INDEX idx_events_device ON events(device_id);
+CREATE INDEX idx_assets_zone ON assets(zone);
+CREATE INDEX idx_assets_status ON assets(status);
+CREATE INDEX idx_assets_location ON assets(lat, lon);
+CREATE INDEX idx_assets_friendly ON assets(is_friendly);
+CREATE INDEX idx_engagements_status ON engagements(status);
+CREATE INDEX idx_engagements_friendly ON engagements(friendly_id);
+CREATE INDEX idx_engagements_enemy ON engagements(enemy_id);
+CREATE INDEX idx_events_asset ON events(asset_id);
+CREATE INDEX idx_events_engagement ON events(engagement_id);
 CREATE INDEX idx_events_timestamp ON events(timestamp);
 CREATE INDEX idx_commands_status ON commands(status);
-CREATE INDEX idx_commands_device ON commands(device_id);
+CREATE INDEX idx_commands_asset ON commands(asset_id);
 
 -- Update updated_at trigger
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -80,13 +85,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Apply trigger to tables
-CREATE TRIGGER update_devices_updated_at
-    BEFORE UPDATE ON devices
+CREATE TRIGGER update_assets_updated_at
+    BEFORE UPDATE ON assets
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_locations_updated_at
-    BEFORE UPDATE ON locations
+CREATE TRIGGER update_engagements_updated_at
+    BEFORE UPDATE ON engagements
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
 

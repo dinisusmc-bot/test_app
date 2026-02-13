@@ -3,8 +3,9 @@ Utility functions for the Command & Control API.
 """
 
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import random
+from app.models.asset import Asset
 
 
 def generate_lat_lon(area: str = "la") -> tuple:
@@ -122,5 +123,50 @@ def generate_simulated_command(device_id: str, command_type: str = None) -> Dict
                 {"lat": random.uniform(33.7, 34.5), "lon": random.uniform(-118.5, -117.5)}
                 for _ in range(random.randint(2, 5))
             ],
+        },
+    }
+
+
+def generate_simulated_asset(asset_type: str = None, area: str = "la", is_friendly: bool = True) -> Dict[str, Any]:
+    """Generate a simulated asset with random data."""
+    if asset_type is None:
+        asset_type = random.choice(["drone", "sensor", "camera", "vehicle"])
+    
+    lat, lon = generate_lat_lon(area)
+    zone = get_zone(lat, lon)
+    
+    asset_status = random.choice(["available", "available", "available", "in_use", "maintenance", "offline"])
+    
+    return {
+        "name": f"{'Friendly' if is_friendly else 'Enemy'}-{asset_type.title()}-{zone[:2].upper()}-{random.randint(100, 999)}",
+        "asset_type": asset_type,
+        "status": asset_status,
+        "lat": lat,
+        "lon": lon,
+        "zone": zone,
+        "is_friendly": is_friendly,
+        "extra_data": {
+            "battery_level": random.randint(10, 100),
+            "signal_strength": random.randint(1, 100),
+            "firmware_version": f"{random.randint(1, 3)}.{random.randint(0, 9)}.{random.randint(0, 99)}",
+            "last_maintenance": (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()),
+        },
+    }
+
+
+def generate_simulated_engagement(friendly: Optional[Asset] = None, enemy: Optional[Asset] = None) -> Dict[str, Any]:
+    """Generate a simulated engagement."""
+    friendly_id = str(friendly.id) if friendly else None
+    enemy_id = str(enemy.id) if enemy else None
+    
+    return {
+        "name": f"Engagement-{friendly_id[:8] if friendly_id else '???'}-to-{enemy_id[:8] if enemy_id else '???'}",
+        "friendly_id": friendly_id,
+        "enemy_id": enemy_id,
+        "status": "pending",
+        "progress": 0,
+        "details": {
+            "engagement_type": random.choice(["missile", "surveillance", "interception"]),
+            "estimated_completion_minutes": random.randint(5, 60),
         },
     }

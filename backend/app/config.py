@@ -18,8 +18,8 @@ class Settings(BaseSettings):
 
     # Database settings
     POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "test_app"
+    POSTGRES_PORT: int = 5433
+    POSTGRES_DB: str = "geo_map_test"
     POSTGRES_USER: str = "openclaw"
     POSTGRES_PASSWORD: str = "openclaw_dev_pass"
 
