@@ -156,11 +156,13 @@ def generate_simulated_asset(asset_type: str = None, area: str = "la", is_friend
 
 def generate_simulated_engagement(friendly: Optional[Asset] = None, enemy: Optional[Asset] = None) -> Dict[str, Any]:
     """Generate a simulated engagement."""
-    friendly_id = str(friendly.id) if friendly else None
-    enemy_id = str(enemy.id) if enemy else None
+    friendly_id = str(friendly.id) if isinstance(friendly, Asset) else friendly.get('id', None) if isinstance(friendly, dict) else None
+    enemy_id = str(enemy.id) if isinstance(enemy, Asset) else enemy.get('id', None) if isinstance(enemy, dict) else None
+    friendly_name = friendly.get('name', '???')[:8] if isinstance(friendly, dict) else (friendly.name[:8] if friendly else '???')
+    enemy_name = enemy.get('name', '???')[:8] if isinstance(enemy, dict) else (enemy.name[:8] if enemy else '???')
     
     return {
-        "name": f"Engagement-{friendly_id[:8] if friendly_id else '???'}-to-{enemy_id[:8] if enemy_id else '???'}",
+        "name": f"Engagement-{friendly_name}-to-{enemy_name}",
         "friendly_id": friendly_id,
         "enemy_id": enemy_id,
         "status": "pending",
