@@ -1,12 +1,13 @@
-# Command & Control System
+# Command & Control System - Test Application
 
-A full-stack application for monitoring and managing devices across LA and San Diego areas.
+A full-stack application for monitoring and managing assets across geospatial zones.
 
 ## Overview
 
 This system provides:
-- **Real-time device monitoring** with geospatial visualization
-- **REST API** for device management
+- **Real-time asset monitoring** with geospatial visualization
+- **Engagement tracking** with friendly/enemy asset relationships
+- **REST API** for asset and engagement management
 - **WebSocket** for real-time status updates
 - **Simulated data** for testing and development
 
@@ -34,7 +35,7 @@ test_app/
 │   │   ├── main.py
 │   │   ├── config.py
 │   │   ├── database.py
-│   │   ├── models/   # SQLAlchemy models
+│   │   ├── models/   # SQLAlchemy models (Assets, Engagements, Events, Commands)
 │   │   ├── schemas/  # Pydantic schemas
 │   │   ├── api/      # API endpoints
 │   │   └── utils/
@@ -77,19 +78,16 @@ npm run dev
 
 ## Sample Data
 
-The system includes 8 simulated devices:
+The system includes simulated asset data:
 
-### LA Area (5 devices)
-- Camera-LA-347 (online)
-- Camera-LA-717 (maintenance)
-- Camera-LA-404 (offline)
-- Sensor-LA-401 (offline)
-- Sensor-LA-660 (maintenance)
+### Assets
+- Multiple friendly assets (green markers)
+- Multiple enemy assets (red markers)
+- Assets across LA and San Diego zones
 
-### San Diego Area (3 devices)
-- Vehicle-SA-624 (maintenance)
-- Drone-SA-980 (online)
-- Drone-SA-310 (online)
+### Engagements
+- Active engagement records
+- Friendly/enemy pairing relationships
 
 ## Technologies
 
@@ -111,8 +109,8 @@ The system includes 8 simulated devices:
 See `tasks.json` for the complete task list:
 - Phase 1: Backend Setup ✅
 - Phase 2: Frontend Setup ✅
-- Phase 3: Documentation 🟡
-- Phase 4: E2E Tests (pending)
+- Phase 3: Documentation ✅
+- Phase 4: E2E Tests ✅
 
 ## Development
 
