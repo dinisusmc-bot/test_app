@@ -4,170 +4,324 @@ API endpoints for v1.
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from sqlalchemy import select, or_
+from typing import List, Optional
 
 from app.database import get_session
-from app.models.devices import Device
-from app.models.locations import Location
-from app.models.events import Event
-from app.models.commands import Command
-from app.schemas.devices import DeviceCreate, DeviceUpdate, DeviceResponse, DeviceListResponse
-from app.schemas.locations import LocationCreate, LocationResponse, LocationNearbyRequest, LocationNearbyResponse
-from app.schemas.events import EventCreate, EventResponse, EventDeviceResponse
+from app.models.asset import Asset
+from app.models.engagement import Engagement
+from app.models.event import Event
+from app.models.command import Command
+from app.schemas.assets import AssetCreate, AssetUpdate, AssetResponse, AssetListResponse
+from app.schemas.engagements import EngagementCreate, EngagementUpdate, EngagementResponse, EngagementListResponse
+from app.schemas.events import EventCreate, EventResponse
 from app.schemas.commands import CommandCreate, CommandResponse
 
 router = APIRouter(tags=["v1"])
 
 
-# Devices endpoints
-@router.get("/devices", response_model=DeviceListResponse)
-async def list_devices(
+# Assets endpoints
+@router.get("/assets", response_model=AssetListResponse)
+async def list_assets(
     session: AsyncSession = Depends(get_session),
     zone: str = None,
     status: str = None,
+    is_friendly: bool = None,
     limit: int = 100,
     offset: int = 0,
 ):
-    """List all devices."""
-    from sqlalchemy import select
-    stmt = select(Device).where(Device.is_active == True)
+    """List all assets."""
+    stmt = select(Asset)
     
     if zone:
-        stmt = stmt.where(Device.zone == zone)
+        stmt = stmt.where(Asset.zone == zone)
     if status:
-        stmt = stmt.where(Device.status == status)
+        stmt = stmt.where(Asset.status == status)
+    if is_friendly is not None:
+        stmt = stmt.where(Asset.is_friendly == is_friendly)
     
     result = await session.execute(stmt.offset(offset).limit(limit))
-    devices = result.scalars().all()
+    assets = result.scalars().all()
     
-    return {"devices": devices, "total": len(devices)}
+    return {"assets": assets, "total": len(assets)}
 
 
-@router.get("/devices/{device_id}", response_model=DeviceResponse)
-async def get_device(
-    device_id: str,
+@router.get("/assets/{asset_id}", response_model=AssetResponse)
+async def get_asset(
+    asset_id: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get device by ID."""
-    device = await session.get(Device, device_id)
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found")
-    return device
+    """Get asset by ID."""
+    asset = await session.get(Asset, asset_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    return asset
 
 
-@router.post("/devices", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
-async def create_device(
-    device: DeviceCreate,
+@router.post("/assets", response_model=AssetResponse, status_code=status.HTTP_201_CREATED)
+async def create_asset(
+    asset: AssetCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    """Create a new device."""
-    db_device = Device(**device.model_dump())
-    session.add(db_device)
+    """Create a new asset."""
+    db_asset = Asset(**asset.model_dump())
+    session.add(db_asset)
     await session.commit()
-    await session.refresh(db_device)
-    return db_device
+    await session.refresh(db_asset)
+    return db_asset
 
 
-@router.put("/devices/{device_id}", response_model=DeviceResponse)
-async def update_device(
-    device_id: str,
-    device: DeviceUpdate,
+@router.put("/assets/{asset_id}", response_model=AssetResponse)
+async def update_asset(
+    asset_id: str,
+    asset: AssetUpdate,
     session: AsyncSession = Depends(get_session),
 ):
-    """Update a device."""
-    db_device = await session.get(Device, device_id)
-    if not db_device:
-        raise HTTPException(status_code=404, detail="Device not found")
+    """Update an asset."""
+    db_asset = await session.get(Asset, asset_id)
+    if not db_asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
     
-    update_data = device.model_dump(exclude_unset=True)
+    update_data = asset.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(db_device, key, value)
+        setattr(db_asset, key, value)
     
     await session.commit()
-    await session.refresh(db_device)
-    return db_device
+    await session.refresh(db_asset)
+    return db_asset
 
 
-@router.delete("/devices/{device_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_device(
-    device_id: str,
+@router.delete("/assets/{asset_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_asset(
+    asset_id: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """Delete a device (soft delete)."""
-    device = await session.get(Device, device_id)
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found")
+    """Delete an asset (soft delete)."""
+    asset = await session.get(Asset, asset_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
     
-    device.is_active = False
+    asset.is_active = False
     await session.commit()
     return None
 
 
-# Locations endpoints
-@router.get("/locations", response_model=List[LocationResponse])
-async def list_locations(
+@router.get("/assets/nearby", response_model=List[AssetResponse])
+async def get_nearby_assets(
+    lat: float,
+    lon: float,
+    radius_km: float = 100,
+    is_friendly: Optional[bool] = None,
     session: AsyncSession = Depends(get_session),
-    zone: str = None,
 ):
-    """List all locations."""
-    from sqlalchemy import select
-    stmt = select(Location)
-    
-    if zone:
-        stmt = stmt.where(Location.zone == zone)
+    """Get assets within radius."""
+    # Get all assets
+    stmt = select(Asset)
+    if is_friendly is not None:
+        stmt = stmt.where(Asset.is_friendly == is_friendly)
     
     result = await session.execute(stmt)
-    return result.scalars().all()
-
-
-@router.get("/locations/{location_id}", response_model=LocationResponse)
-async def get_location(
-    location_id: str,
-    session: AsyncSession = Depends(get_session),
-):
-    """Get location by ID."""
-    location = await session.get(Location, location_id)
-    if not location:
-        raise HTTPException(status_code=404, detail="Location not found")
-    return location
-
-
-@router.post("/locations", response_model=LocationResponse, status_code=status.HTTP_201_CREATED)
-async def create_location(
-    location: LocationCreate,
-    session: AsyncSession = Depends(get_session),
-):
-    """Create a new location."""
-    db_location = Location(**location.model_dump())
-    session.add(db_location)
-    await session.commit()
-    await session.refresh(db_location)
-    return db_location
-
-
-@router.get("/locations/nearby", response_model=List[LocationResponse])
-async def get_nearby_locations(
-    request: LocationNearbyRequest,
-    session: AsyncSession = Depends(get_session),
-):
-    """Get locations within radius."""
-    # Simplified - in production, use PostgreSQL PostGIS for geospatial queries
-    locations = await session.execute(session.query(Location))
-    locations = locations.scalars().all()
+    assets = result.scalars().all()
     
     # Filter by distance (simplified calculation)
     nearby = []
-    for loc in locations:
-        if loc.location_lat and loc.location_lon:
+    for asset in assets:
+        if asset.lat and asset.lon:
             # Simple Euclidean distance approximation
-            lat_diff = abs(loc.location_lat - request.lat)
-            lon_diff = abs(loc.location_lon - request.lon)
+            lat_diff = abs(asset.lat - lat)
+            lon_diff = abs(asset.lon - lon)
             distance = (lat_diff ** 2 + lon_diff ** 2) ** 0.5 * 111  # Approx km
             
-            if distance <= request.radius_km:
-                nearby.append(loc)
+            if distance <= radius_km:
+                nearby.append(asset)
     
     return nearby
+
+
+# Engagements endpoints
+@router.get("/engagements", response_model=EngagementListResponse)
+async def list_engagements(
+    session: AsyncSession = Depends(get_session),
+    status: str = None,
+    friendly_id: str = None,
+    enemy_id: str = None,
+    limit: int = 100,
+    offset: int = 0,
+):
+    """List all engagements."""
+    stmt = select(Engagement)
+    
+    if status:
+        stmt = stmt.where(Engagement.status == status)
+    if friendly_id:
+        stmt = stmt.where(Engagement.friendly_id == friendly_id)
+    if enemy_id:
+        stmt = stmt.where(Engagement.enemy_id == enemy_id)
+    
+    result = await session.execute(stmt.offset(offset).limit(limit))
+    engagements = result.scalars().all()
+    
+    return {"engagements": engagements, "total": len(engagements)}
+
+
+@router.get("/engagements/{engagement_id}", response_model=EngagementResponse)
+async def get_engagement(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get engagement by ID."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    return engagement
+
+
+@router.post("/engagements", response_model=EngagementResponse, status_code=status.HTTP_201_CREATED)
+async def create_engagement(
+    engagement: EngagementCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    """Create a new engagement."""
+    db_engagement = Engagement(**engagement.model_dump())
+    session.add(db_engagement)
+    await session.commit()
+    await session.refresh(db_engagement)
+    return db_engagement
+
+
+@router.put("/engagements/{engagement_id}", response_model=EngagementResponse)
+async def update_engagement(
+    engagement_id: str,
+    engagement: EngagementUpdate,
+    session: AsyncSession = Depends(get_session),
+):
+    """Update an engagement."""
+    db_engagement = await session.get(Engagement, engagement_id)
+    if not db_engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    update_data = engagement.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_engagement, key, value)
+    
+    await session.commit()
+    await session.refresh(db_engagement)
+    return db_engagement
+
+
+@router.delete("/engagements/{engagement_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_engagement(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Delete an engagement."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    await session.delete(engagement)
+    await session.commit()
+    return None
+
+
+# Engagement actions endpoints
+@router.post("/engagements/{engagement_id}/confirm", response_model=EngagementResponse)
+async def confirm_engagement(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Confirm an engagement."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    if engagement.status != "pending":
+        raise HTTPException(status_code=400, detail="Engagement must be in pending status")
+    
+    engagement.status = "active"
+    engagement.progress = 0
+    await session.commit()
+    await session.refresh(engagement)
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/abort", response_model=EngagementResponse)
+async def abort_engagement(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Abort an engagement."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    if engagement.status not in ["pending", "active"]:
+        raise HTTPException(status_code=400, detail="Engagement must be in pending or active status")
+    
+    engagement.status = "cancelled"
+    await session.commit()
+    await session.refresh(engagement)
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/engage", response_model=EngagementResponse)
+async def engage_target(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Start engagement (missile launch)."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    if engagement.status != "active":
+        raise HTTPException(status_code=400, detail="Engagement must be confirmed before engaging")
+    
+    engagement.status = "engaging"
+    await session.commit()
+    await session.refresh(engagement)
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/complete", response_model=EngagementResponse)
+async def complete_engagement(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Mark engagement as complete."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    if engagement.status != "engaging":
+        raise HTTPException(status_code=400, detail="Engagement must be engaging to be completed")
+    
+    engagement.status = "completed"
+    engagement.progress = 100
+    await session.commit()
+    await session.refresh(engagement)
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/missile-launch", response_model=EngagementResponse)
+async def launch_missile(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Simulate missile launch."""
+    engagement = await session.get(Engagement, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Engagement not found")
+    
+    if engagement.status != "engaging":
+        raise HTTPException(status_code=400, detail="Engagement must be in engaging status")
+    
+    # Update status to reflect missile in flight
+    engagement.status = "missile_in_flight"
+    engagement.progress = 0
+    await session.commit()
+    await session.refresh(engagement)
+    return engagement
 
 
 # Events endpoints
@@ -191,14 +345,26 @@ async def list_events(
     return events.scalars().all()
 
 
-@router.get("/events/device/{device_id}", response_model=List[EventResponse])
-async def get_device_events(
-    device_id: str,
+@router.get("/events/asset/{asset_id}", response_model=List[EventResponse])
+async def get_asset_events(
+    asset_id: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get events for a device."""
+    """Get events for an asset."""
     events = await session.execute(
-        session.query(Event).filter(Event.device_id == device_id)
+        session.query(Event).filter(Event.asset_id == asset_id)
+    )
+    return events.scalars().all()
+
+
+@router.get("/events/engagement/{engagement_id}", response_model=List[EventResponse])
+async def get_engagement_events(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get events for an engagement."""
+    events = await session.execute(
+        session.query(Event).filter(Event.engagement_id == engagement_id)
     )
     return events.scalars().all()
 
@@ -231,6 +397,30 @@ async def list_commands(
         query = query.filter(Command.status == status)
     
     commands = await session.execute(query.offset(offset).limit(limit))
+    return commands.scalars().all()
+
+
+@router.get("/commands/asset/{asset_id}", response_model=List[CommandResponse])
+async def get_asset_commands(
+    asset_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get commands for an asset."""
+    commands = await session.execute(
+        session.query(Command).filter(Command.asset_id == asset_id)
+    )
+    return commands.scalars().all()
+
+
+@router.get("/commands/engagement/{engagement_id}", response_model=List[CommandResponse])
+async def get_engagement_commands(
+    engagement_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get commands for an engagement."""
+    commands = await session.execute(
+        session.query(Command).filter(Command.engagement_id == engagement_id)
+    )
     return commands.scalars().all()
 
 
